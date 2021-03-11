@@ -1,0 +1,2 @@
+# textdomain: pull_cart
+Cart=

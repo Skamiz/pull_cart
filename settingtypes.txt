@@ -1,0 +1,4 @@
+# Cart pulling speed
+#
+# How fast you move while pulling a cart.
+cart_speed_multiplier (Cart pulling speed) float 0.7
