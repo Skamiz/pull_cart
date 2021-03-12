@@ -264,6 +264,9 @@ minetest.register_entity(modname .. ":pull_cart", {
 			pos.y = o_pos.y
 			if minetest.registered_nodes[minetest.get_node(vector.round(pos)).name].walkable then
 				pos.y = pos.y + 0.6
+				if minetest.registered_nodes[minetest.get_node(vector.round(pos)).name].walkable then
+					return
+				end
 			end
 			object:move_to(pos, true)
 		end
