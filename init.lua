@@ -79,6 +79,7 @@ minetest.register_entity(modname .. ":pull_cart", {
 		collide_with_objects = true,
 		static_save = true,
 		wield_item = modname .. ":pull_cart",
+		stepheight = 0.6,
 	},
 
 	_attach = function(self, player)
@@ -104,6 +105,9 @@ minetest.register_entity(modname .. ":pull_cart", {
 		local rot = self.object:get_rotation()
 		rot.x = -(math.pi / 8)
 		self.object:set_rotation(rot)
+
+		local vel = object:get_velocity()
+		self.object:set_velocity({x=0,y=vel.y,z=0})
 
 		local po = player:get_physics_override()
 		po.speed = 1
@@ -139,15 +143,15 @@ minetest.register_entity(modname .. ":pull_cart", {
 
 	_show_formspec = function(self, player)
 		minetest.show_formspec(player:get_player_name(), modname .. ":inventory",
-		"formspec_version[4]" ..
-		"size[10.75,8.5]"..
-		"container[0.5,0.5]"..
-		"list[detached:" .. modname .. ":cart_" .. self.cart_number .. ";main;0,0;8,2;]" ..
-		"list[current_player;main;0,2.75;8,4;]" ..
-		"listring[]" ..
-		"container_end[]" ..
-		""
-	)
+			"formspec_version[4]" ..
+			"size[10.75,8.5]"..
+			"container[0.5,0.5]"..
+			"list[detached:" .. modname .. ":cart_" .. self.cart_number .. ";main;0,0;8,2;]" ..
+			"list[current_player;main;0,2.75;8,4;]" ..
+			"listring[]" ..
+			"container_end[]" ..
+			""
+		)
 	end,
 
 	_remove_children = function(self)
@@ -185,7 +189,9 @@ minetest.register_entity(modname .. ":pull_cart", {
 	end,
 
 	on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
-		self:_remove()
+		if not self.puller then
+			self:_remove()
+		end
 	end,
 
 	get_staticdata = function(self)
@@ -247,28 +253,37 @@ minetest.register_entity(modname .. ":pull_cart", {
 			p_pos.y = p_pos.y + 0.5
 			local direction = vector.subtract(p_pos, object:get_pos())
 
+			-- detach if the puller gets too far from the cart
 			if distance_2(direction) > (2.5*2.5) then
 				self:_detach(puller)
 				return
 			end
 
+			-- turn so the handles faces towards the puller
 			local rot = object:get_rotation()
 			rot.x = math.atan2(direction.y, distance_to_cart)
 			rot.y = minetest.dir_to_yaw(direction)
 			object:set_rotation(rot)
 
+			-- figure out where the cart should be in relation to the puller
 			direction.y = 0
 			local direction = vector.normalize(direction)
 			local o_pos = object:get_pos()
 			local pos = vector.subtract(p_pos, vector.multiply(direction, distance_to_cart))
 			pos.y = o_pos.y
-			if minetest.registered_nodes[minetest.get_node(vector.round(pos)).name].walkable then
-				pos.y = pos.y + 0.6
-				if minetest.registered_nodes[minetest.get_node(vector.round(pos)).name].walkable then
-					return
-				end
+
+			-- set velocity to move to that position
+			local direction_to_rest_pos = vector.subtract(pos, o_pos)
+			local vel = object:get_velocity()
+			if distance_2(direction_to_rest_pos) < 0.001 then
+				object:set_velocity({x=0,y=vel.y,z=0})
+			else
+				-- speed_multiplier should actually be replaced with the pullers movement speed
+				direction_to_rest_pos = vector.multiply(direction_to_rest_pos, speed_multiplier * (1/dtime))
+				-- this is important to preserve downwards movement due to gravity
+				direction_to_rest_pos.y = vel.y
+				object:set_velocity(direction_to_rest_pos)
 			end
-			object:move_to(pos, true)
 		end
 	end,
 })
