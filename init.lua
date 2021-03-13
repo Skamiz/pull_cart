@@ -106,7 +106,7 @@ minetest.register_entity(modname .. ":pull_cart", {
 		rot.x = -(math.pi / 8)
 		self.object:set_rotation(rot)
 
-		local vel = object:get_velocity()
+		local vel = self.object:get_velocity()
 		self.object:set_velocity({x=0,y=vel.y,z=0})
 
 		local po = player:get_physics_override()
