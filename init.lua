@@ -18,6 +18,8 @@ pull_cart.players = {}
 -- meant to be a multiplier, but with the current simple way of handling pysics overrides
 -- it just flat out sets the speed to this value
 local speed_multiplier = tonumber(minetest.settings:get("cart_speed_multiplier")) or 0.7
+-- if this is true, pulling a cart does not prevent going up whole blocks at once
+local offroad_cart = minetest.settings:get("offroad_cart") == "true"
 -- if you change this don't forget to also change the formspec
 local cart_inv_size = 2*8
 -- how far the cart stays behind the player
@@ -79,7 +81,7 @@ minetest.register_entity(modname .. ":pull_cart", {
 		collide_with_objects = true,
 		static_save = true,
 		wield_item = modname .. ":pull_cart",
-		stepheight = 0.6,
+		stepheight = offroad_cart and 1.1 or 0.6,
 	},
 
 	_attach = function(self, player)
@@ -93,7 +95,11 @@ minetest.register_entity(modname .. ":pull_cart", {
 		-- TODO: naturally this shouldn't touch the PO so directly
 		local po = player:get_physics_override()
 		po.speed = speed_multiplier
-		po.jump = 0
+		if offroad_cart then
+			po.jump = 0.9
+		else
+			po.jump = 0.5
+		end
 		player:set_physics_override(po)
 	end,
 

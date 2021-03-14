@@ -2,3 +2,10 @@
 #
 # How fast you move while pulling a cart.
 cart_speed_multiplier (Cart pulling speed) float 0.7
+
+
+# The whole point of this mods is to encourage building infrastructure,
+# but if you'd rather not, this lets you avoid it.
+#
+# Retain your ability to jump and increse the carts step height.
+offroad_cart (Use carts without a road) bool false
