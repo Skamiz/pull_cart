@@ -176,6 +176,7 @@ minetest.register_entity(modname .. ":pull_cart", {
 		minetest.add_item(pos, {name = modname .. ":pull_cart"})
 
 		storage:set_string("cart_" .. self.cart_number, "")
+		minetest.remove_detached_inventory("cart_" .. self.cart_number)
 		self:_remove_children()
 		self.object:remove()
 	end,
@@ -223,14 +224,11 @@ minetest.register_entity(modname .. ":pull_cart", {
 			self.inv = inv
 		else
 			self.cart_number = tonumber(staticdata)
-			local inv = minetest.get_inventory({type = "detached", name = modname .. ":cart_" .. self.cart_number})
-			-- if the game was closed the inventories have to be made anew, instead of just reattached
-			if not inv then
-				inv = minetest.create_detached_inventory(modname .. ":cart_" .. self.cart_number, self:_get_callbacks())
-				inv:set_size("main", cart_inv_size)
-				local inv_content = minetest.deserialize(storage:get_string("cart_" .. self.cart_number))
-				inv:set_list("main", inv_content)
-			end
+
+			local inv = minetest.create_detached_inventory(modname .. ":cart_" .. self.cart_number, self:_get_callbacks())
+			inv:set_size("main", cart_inv_size)
+			local inv_content = minetest.deserialize(storage:get_string("cart_" .. self.cart_number))
+			inv:set_list("main", inv_content)
 
 			self.inv = inv
 		end
@@ -246,6 +244,7 @@ minetest.register_entity(modname .. ":pull_cart", {
 
 		local inv_content = minetest.serialize(inv_content)
 		storage:set_string("cart_" .. self.cart_number, inv_content)
+		minetest.remove_detached_inventory("cart_" .. self.cart_number)
 
 		self:_remove_children()
 	end,
