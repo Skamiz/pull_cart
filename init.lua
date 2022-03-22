@@ -67,6 +67,7 @@ minetest.register_node(modname .. ":pull_cart", {
 		local rot = cart:get_rotation()
 		rot.y = minetest.dir_to_yaw(vector.subtract(placer:get_pos(), cart:get_pos()))
 		cart:set_rotation(rot)
+		cart:set_armor_groups({punch_operable = 1})
 
 		itemstack:take_item()
 		return itemstack
@@ -199,6 +200,10 @@ minetest.register_entity(modname .. ":pull_cart", {
 		if not self.puller then
 			self:_remove()
 		end
+	end,
+
+	on_death = function(self, killer)
+		minetest.chat_send_all("Cart was killed. This shouldn't happen.")
 	end,
 
 	get_staticdata = function(self)
