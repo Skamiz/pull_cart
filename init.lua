@@ -285,11 +285,12 @@ minetest.register_entity(modname .. ":pull_cart", {
 			-- set velocity to move to that position
 			local direction_to_rest_pos = vector.subtract(pos, o_pos)
 			local vel = object:get_velocity()
-			if distance_2(direction_to_rest_pos) < 0.001 then
+			if distance_2(direction_to_rest_pos) < 0.01 then
 				object:set_velocity({x=0,y=vel.y,z=0})
 			else
+				-- direction_to_rest_pos = vector.normalize(direction_to_rest_pos)
 				-- speed_multiplier should actually be replaced with the pullers movement speed
-				direction_to_rest_pos = vector.multiply(direction_to_rest_pos, speed_multiplier * (1/dtime))
+				direction_to_rest_pos = vector.multiply(direction_to_rest_pos,  200 * speed_multiplier * dtime)
 				-- this is important to preserve downwards movement due to gravity
 				direction_to_rest_pos.y = vel.y
 				object:set_velocity(direction_to_rest_pos)
