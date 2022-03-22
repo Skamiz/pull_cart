@@ -162,7 +162,7 @@ minetest.register_entity(modname .. ":pull_cart", {
 	end,
 
 	_remove_children = function(self)
-		for _, child in pairs(self.object:get_children()) do
+		for _, child in pairs(self.object:get_children() or {}) do
 			child:remove()
 		end
 	end,
